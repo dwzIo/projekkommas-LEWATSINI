@@ -25,10 +25,16 @@ service cloud.firestore {
         (request.auth.uid == uid && okLoc()
           && request.resource.data.to is string
           && request.resource.data.n is string && request.resource.data.n.size() <= 30
-          && request.resource.data.s == 'minta')
+          && request.resource.data.vn is string && request.resource.data.vn.size() <= 30
+          && request.resource.data.s == 'minta' && request.resource.data.cx == '')
+        || (resource != null && request.auth.uid == uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['s','cx'])
+          && ((resource.data.s == 'minta' && request.resource.data.s == 'batal')
+            || (resource.data.s == 'terima' && request.resource.data.s in ['terima','batal'])))
         || (resource != null && resource.data.to == request.auth.uid
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['s'])
-          && request.resource.data.s in ['terima','tolak']));
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['s','cx'])
+          && resource.data.s in ['minta','terima']
+          && request.resource.data.s in ['terima','tolak','batal']));
     }
     match /users/{uid} {
       allow read, write: if request.auth != null && request.auth.uid == uid

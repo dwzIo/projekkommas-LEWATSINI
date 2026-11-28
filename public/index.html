@@ -53,6 +53,7 @@ a.row:hover{background:var(--tint)}a.row:active{background:var(--tint)}
 .pm.on{background:var(--acc);border-color:var(--acc);color:var(--onacc)}
 [data-theme=dark] .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.95) contrast(.9)}
 button.row{width:100%;background:none;border:0;border-top:1px solid var(--line);font:inherit;color:inherit;text-align:left;cursor:pointer}
+[hidden]{display:none!important}
 .toast{z-index:1200}
 .mw{position:relative}
 .locb{position:absolute;right:10px;bottom:10px;z-index:500;width:44px;height:44px;display:grid;place-items:center;padding:0;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);transition:background-color .15s}
@@ -96,13 +97,13 @@ import {getAuth,signInAnonymously} from 'https://www.gstatic.com/firebasejs/13.4
 import {getFirestore,doc,setDoc,updateDoc,query,where,collection,onSnapshot} from 'https://www.gstatic.com/firebasejs/13.4.0/firebase-firestore.js';
 // ISI dengan konfigurasi Web App dari Firebase Console (Project settings > Your apps).
 const firebaseConfig = {
-    apiKey: "ISI_SESUAI-FIRBASE",
-    authDomain: "ISI_SESUAI-FIRBASE",
-    projectId: "ISI_SESUAI-FIRBASE",
-    storageBucket: "ISI_SESUAI-FIRBASE",
-    messagingSenderId: "ISI_SESUAI-FIRBASE",
-    appId: "ISI_SESUAI-FIRBASE",
-    measurementId: "ISI_SESUAI-FIRBASE"
+    apiKey: "ISI_SESUAI_FIREBASE",
+    authDomain: "ISI_SESUAI_FIREBASE",
+    projectId: "ISI_SESUAI_FIREBASE",
+    storageBucket: "ISI_SESUAI_FIREBASE",
+    messagingSenderId: "921763588241",
+    appId: "ISI_SESUAI_FIREBASE",
+    measurementId: "ISI_SESUAI_FIREBASE"
   };
 const $=i=>document.getElementById(i);
 const I=(k,c)=>`<svg class="ic${c?' '+c:''}" aria-hidden="true"><use href="#i-${k}"/></svg>`;
@@ -115,19 +116,15 @@ const rel=(a,b)=>[(b.lng-a.lng)*111320*Math.cos(a.lat*R0),-(b.lat-a.lat)*110540]
 const dir=(x,y)=>['utara','timur laut','timur','tenggara','selatan','barat daya','barat','barat laut'][Math.round(Math.atan2(x,-y)/(Math.PI/4)+8)%8];
 const fm=m=>m<1000?Math.round(m)+' m':(m/1000).toFixed(1).replace('.',',')+' km';
 let db=null,uid=null,subs=[],watch=null,leave=null,tt,wl=null;
-const AL0={on:false,r:250,s:'lonceng',v:true,w:[],k:[],cu:'',cn:''},SD={lonceng:'Lonceng',kentongan:'Kentongan',klakson:'Klakson',dering:'Dering'},RD=[100,250,500,1000];
+const AL0={on:false,r:250,s:'lonceng',v:true,w:[],k:[],cu:'',cn:''},SD={lonceng:'Lonceng',kentongan:'Kentongan',klakson:'Klakson'},RD=[100,250,500,1000];
 let al={...AL0},ac=null;
 try{Object.assign(al,JSON.parse(localStorage.getItem('ls-al')||'{}'))}catch(_){}
 if(!Array.isArray(al.w))al.w=[];if(!Array.isArray(al.k))al.k=[];if(!SD[al.s]&&!(al.s==='custom'&&al.cu))al.s='lonceng';if(!RD.includes(al.r))al.r=250;
 const saveAl=()=>{try{localStorage.setItem('ls-al',JSON.stringify(al))}catch(_){}};
-function unlock(){try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume()}catch(_){}}
-function beep(f,t,d,ty,g){const o=ac.createOscillator(),n=ac.createGain(),s=ac.currentTime+t;o.type=ty;o.frequency.value=f;n.gain.setValueAtTime(.0001,s);n.gain.exponentialRampToValueAtTime(g,s+.01);n.gain.exponentialRampToValueAtTime(.0001,s+d);o.connect(n);n.connect(ac.destination);o.start(s);o.stop(s+d+.05)}
-function ring(k,vib){if(k==='custom'&&al.cu){try{new Audio(al.cu).play()}catch(_){}if(vib&&navigator.vibrate)navigator.vibrate([250,120,250,120,400]);return}unlock();if(ac){
-if(k==='lonceng')[0,.5,1].forEach(t=>{beep(1320,t,1.1,'sine',.5);beep(1980,t,.7,'sine',.2)});
-else if(k==='kentongan')[0,.3,.6,.9].forEach((t,i)=>beep(i%2?150:190,t,.2,'square',.35));
-else if(k==='klakson'){beep(420,0,.35,'sawtooth',.25);beep(420,.5,.35,'sawtooth',.25)}
-else[0,.35,.7,1.05].forEach((t,i)=>beep(i%2?880:660,t,.3,'triangle',.4))}
-if(vib&&navigator.vibrate)navigator.vibrate([250,120,250,120,400])}
+const AU={};let cur=null,un=0;
+const getA=k=>k==='custom'?(al.cu?(AU.cs===al.cu?AU.c:(AU.cs=al.cu,AU.c=new Audio(al.cu))):null):(AU[k]||(AU[k]=new Audio('sounds/'+k+'.mp3')));
+function unlock(){if(un)return;un=1;Object.keys(SD).forEach(k=>{const a=getA(k);a.preload='auto';a.muted=true;a.play().then(()=>{a.pause();a.currentTime=0;a.muted=false}).catch(()=>{a.muted=false})})}
+function ring(k,vib){try{if(cur){cur.pause();cur.currentTime=0}const a=getA(k);if(a){cur=a;a.muted=false;a.currentTime=0;a.play().catch(()=>{})}}catch(_){}if(vib&&navigator.vibrate)navigator.vibrate([250,120,250,120,400])}
 addEventListener('pointerdown',()=>{if(al.on)unlock()},{passive:true});
 let th='light';try{th=localStorage.getItem('ls-th')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')}catch(_){}
 const applyTh=()=>{document.documentElement.dataset.theme=th;$('thb').innerHTML=I(th==='dark'?'sun':'moon')};
@@ -136,16 +133,17 @@ const ic=v=>CK(v.ic||v.c),pts=v=>{const a=v.path||[],o=[];for(let i=0;i+1<a.leng
 const rt=v=>{const p=pts(v);if(p.length<2)return'Rute: belum bergerak';let d=0;for(let i=1;i<p.length;i++)d+=dist({lat:p[i-1][0],lng:p[i-1][1]},{lat:p[i][0],lng:p[i][1]});return'Rute: mulai '+new Date(v.ts||Date.now()).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})+' · '+fm(d)};
 const eta=v=>{if(v.st!=='jalan')return 'Sedang '+ST[v.st].toLowerCase();if(v.d<20)return 'Sudah dekat';const m=v.d/1.2/60,lo=Math.max(1,Math.round(m*.8)),hi=Math.max(lo+1,Math.round(m*1.3));return 'Lewat sekitar '+lo+'–'+hi+' menit lagi'};
 const prof=(role,n)=>db.doc('users/'+uid).set({role,n:n||'',t:Date.now()}).catch(()=>{});
+const ntf=m=>{toast(m);if(navigator.vibrate)navigator.vibrate([200,100,200])};
 const clusters=vs=>{const l=[...vs],o=[];while(l.length){const a=l.shift(),g=[a];for(let i=l.length-1;i>=0;i--)if(dist(a,l[i])<=150)g.push(...l.splice(i,1));o.push({n:g.length,lat:g.reduce((s,v)=>s+v.lat,0)/g.length,lng:g.reduce((s,v)=>s+v.lng,0)/g.length,names:g.map(v=>v.n)})}return o.filter(x=>x.n>1).sort((a,b)=>b.n-a.n)};
 function toast(m){const t=$('t');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2600)}
 function clean(){if(leave){leave();leave=null}subs.forEach(f=>f());subs=[];unwatch();try{wl&&wl.release();}catch(_){}wl=null}
 const G=()=>{const c=window.Capacitor;return c&&c.isNativePlatform&&c.isNativePlatform()&&c.Plugins&&c.Plugins.Geolocation};
 function unwatch(){if(!watch)return;const w=watch;watch=null;try{if(w.n)G().clearWatch({id:w.id});else navigator.geolocation.clearWatch(w.id)}catch(_){}}
-async function track(ok,bad){const g=G();
+async function track(ok,bad){let got=0;const g=G();
 if(g){try{const q=await g.requestPermissions();if(q.location==='denied'){bad('Izin lokasi ditolak. Aktifkan lewat Pengaturan aplikasi.');return}
-const id=await g.watchPosition({enableHighAccuracy:true,timeout:20000},(p,e)=>{if(e||!p)return bad('Lokasi belum terdeteksi. Coba di tempat terbuka.');ok({lat:p.coords.latitude,lng:p.coords.longitude,acc:p.coords.accuracy})});watch={n:1,id}}catch(_){bad('Lokasi tidak bisa diakses.')}return}
+const id=await g.watchPosition({enableHighAccuracy:true,timeout:60000,maximumAge:0},(p,e)=>{if(e||!p){if(!got)bad('Lokasi belum terdeteksi. Coba di tempat terbuka.');return}got=1;ok({lat:p.coords.latitude,lng:p.coords.longitude,acc:p.coords.accuracy,spd:p.coords.speed})});watch={n:1,id}}catch(_){bad('Lokasi tidak bisa diakses.')}return}
 if(!navigator.geolocation){bad('Perangkat ini tidak mendukung lokasi.');return}
-watch={id:navigator.geolocation.watchPosition(p=>ok({lat:p.coords.latitude,lng:p.coords.longitude,acc:p.coords.accuracy}),e=>bad(e.code===1?'Izin lokasi ditolak. Aktifkan izin lokasi lalu muat ulang halaman.':'Lokasi belum terdeteksi. Coba di tempat terbuka.'),{enableHighAccuracy:true,maximumAge:5000,timeout:20000})}}
+watch={id:navigator.geolocation.watchPosition(p=>{got=1;ok({lat:p.coords.latitude,lng:p.coords.longitude,acc:p.coords.accuracy,spd:p.coords.speed})},e=>(e.code===1||!got)&&bad(e.code===1?'Izin lokasi ditolak. Aktifkan izin lokasi lalu muat ulang halaman.':'Lokasi belum terdeteksi. Coba di tempat terbuka.'),{enableHighAccuracy:true,maximumAge:5000,timeout:20000})}}
 function chips(id,items,cur,fn){$(id).innerHTML=items.map(c=>`<button class="chip" data-k="${c[0]}" aria-pressed="${c[0]===cur}">${c[1]}</button>`).join('');$(id).onclick=e=>{const b=e.target.closest('.chip');if(!b)return;document.querySelectorAll('#'+id+' .chip').forEach(x=>x.setAttribute('aria-pressed',x===b));fn(b.dataset.k)}}
 
 function home(){$('app').innerHTML=`<h1 style="margin-top:28px">Lewat Sini</h1><p class="sub">Temukan pedagang keliling di dekatmu, atau bagikan posisimu saat berjualan.</p><a class="row" href="#pembeli">${I('pin')}<div><div class="nm">Saya pembeli</div><div class="meta">Lihat pedagang dan titik ramai di sekitarmu</div></div>${I('right')}</a><a class="row" href="#pedagang">${I('store')}<div><div class="nm">Saya pedagang</div><div class="meta">Bagikan posisi saat berjualan</div></div>${I('right')}</a>`}
@@ -154,8 +152,9 @@ function pembeli(){
 $('app').innerHTML=`<a class="back" href="#">${I('left')}Ganti peran</a><h1>Cari pedagang</h1><p class="sub">Geser dan perbesar peta untuk melihat pedagang yang jauh.</p>
 <div class="mw"><div id="map"></div><button class="locb" id="loc" aria-label="Ke posisiku">${I('locate')}</button></div><button class="btn sec" id="fa" style="margin-top:8px">Lihat semua pedagang</button>
 <p class="note" id="msg" role="status"></p>
-<div id="dt"></div>
+<div id="rq"></div><div id="dt"></div>
 <h2>Cari pedagang</h2>
+<div class="seg" id="rg" style="margin:6px 0 8px"><button class="chip" data-k="dekat" aria-pressed="true">Dekat (5 km)</button><button class="chip" data-k="semua" aria-pressed="false">Jauh atau umum</button></div><p class="note" id="rgn" style="margin:0 0 8px"></p>
 <input id="q" type="search" placeholder="Nama atau jenis dagangan" aria-label="Cari pedagang">
 <select id="cf" aria-label="Jenis dagangan"></select><select id="vs" aria-label="Pilih pedagang"></select>
 <h2>Titik ramai</h2><div id="hot"></div>
@@ -169,40 +168,58 @@ $('app').innerHTML=`<a class="back" href="#">${I('left')}Ganti peran</a><h1>Cari
 <div class="nm" style="margin:12px 0 0">Suara sendiri (opsional)</div><button class="btn sec" id="alfb" type="button" style="margin-top:6px">Pilih file suara</button><input id="alf" type="file" accept="audio/*" hidden><p class="meta" id="alfn"></p>
 <p class="note">Hanya berbunyi saat aplikasi terbuka dan layar menyala, dan hanya untuk pedagang yang kamu pantau.</p></div>
 <h2>Profilmu</h2><label for="bn" style="margin:0">Nama panggilan</label><input id="bn" maxlength="30" placeholder="Dilihat pedagang saat kamu minta lewat">`;
-let here=null,V=[],C=[],sel='',q='',f='semua',cd={},seen={},fit=false,map=null,layer=null,mc=null,cats=[];
+let here=null,V=[],C=[],sel='',q='',f='semua',cd={},seen={},fit=false,map=null,layer=null,mc=null,cats=[],rg='dekat';
 if(window.L){map=L.map('map').setView([-7.8,110.37],13);L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'}).addTo(map);layer=L.layerGroup().addTo(map);subs.push(()=>{map.remove();map=null})}else $('map').innerHTML='<p class="note" style="padding:12px">Peta tidak termuat. Periksa koneksi internet.</p>';
 const act=()=>{const n=Date.now();return V.filter(v=>v.on&&n-v.t<18e4).map(v=>({...v,d:here?dist(here,v):0}))};
 const watchNear=()=>{if(!al.on||!here)return;const a=act(),ids=new Set(a.map(v=>v.id));for(const k in seen)if(!ids.has(k))delete seen[k];a.forEach(v=>{if(!(al.w.includes(v.id)||al.k.includes(v.c))||v.d>al.r*1.3){delete seen[v.id];return}if(v.d<=al.r&&!seen[v.id]){seen[v.id]=1;ring(al.s,al.v);toast(v.n+' sudah dekat, '+fm(v.d)+' dari kamu.')}})};
-const rf=()=>{$('alon').setAttribute('aria-checked',al.on);$('alv').setAttribute('aria-checked',al.v);$('alset').hidden=!al.on;$('alr').value=al.r;
-$('als').innerHTML=Object.entries(SD).map(([k,n])=>`<option value="${k}">${n}</option>`).join('')+(al.cu?`<option value="custom">Suara sendiri${al.cn?' ('+esc(al.cn)+')':''}</option>`:'');$('als').value=al.s;$('ac').innerHTML=cats.map(c=>`<button class="chip" data-k="${esc(c)}" aria-pressed="${al.k.includes(c)}">${esc(lab(c))}</button>`).join('');$('alfn').textContent=al.cn?'File: '+al.cn:'';
+const rf=()=>{$('alon').setAttribute('aria-checked',al.on);$('alv').setAttribute('aria-checked',al.v);$('alset').hidden=!al.on;if($('alr').value!=al.r)$('alr').value=al.r;
+const sk=al.cu?al.cn:'';if($('als').dataset.k!==sk){$('als').dataset.k=sk;$('als').innerHTML=Object.entries(SD).map(([k,n])=>`<option value="${k}">${n}</option>`).join('')+(al.cu?`<option value="custom">Suara sendiri${al.cn?' ('+esc(al.cn)+')':''}</option>`:'')}
+if($('als').value!==al.s)$('als').value=al.s;
+const ak=cats.join('|')+'#'+al.k.join('|');if($('ac').dataset.k!==ak){$('ac').dataset.k=ak;$('ac').innerHTML=cats.map(c=>`<button class="chip" data-k="${esc(c)}" aria-pressed="${al.k.includes(c)}">${esc(lab(c))}</button>`).join('')}
+$('alfn').textContent=al.cn?'File: '+al.cn:'';
 const wn=al.w.map(id=>(V.find(v=>v.id===id)||{}).n).filter(Boolean);$('wn').textContent=wn.length?'Dipantau: '+wn.join(', '):'Pilih pedagang di atas, lalu nyalakan “Pantau pedagang ini”.'};
+const focus=v=>{if(!map)return;const p=pts(v);if(p.length>1)map.fitBounds(p,{padding:[40,40],maxZoom:17});else map.panTo([v.lat,v.lng])};
+const rqOn=()=>mc&&((mc.s==='minta'&&Date.now()-mc.t<9e5)||(mc.s==='terima'&&Date.now()-mc.t<108e5));
 const draw=()=>{
-const a=act().sort((x,y)=>x.d-y.d),list=a.filter(v=>(f==='semua'||f===v.c)&&(lab(v.c)+' '+v.n).toLowerCase().includes(q));
+const a=act().sort((x,y)=>x.d-y.d),list=a.filter(v=>(f==='semua'||f===v.c)&&(rg==='semua'||!here||v.d<=5e3)&&(lab(v.c)+' '+v.n).toLowerCase().includes(q));
 const cs=[...new Set([...Object.keys(CL),...a.map(v=>v.c)])],ck=cs.join('|');cats=cs;
 if($('cf').dataset.k!==ck){$('cf').dataset.k=ck;$('cf').innerHTML='<option value="semua">Semua jenis</option>'+cs.map(c=>`<option value="${esc(c)}">${esc(lab(c))}</option>`).join('');$('cf').value=f}
 if(sel&&!list.some(v=>v.id===sel))sel='';
-const key=list.map(v=>v.id).join()+'|'+sel;
-if($('vs').dataset.k!==key){$('vs').dataset.k=key;$('vs').innerHTML=`<option value="">${list.length?'Pilih pedagang ('+list.length+' aktif)':'Belum ada pedagang aktif'}</option>`+list.map(v=>`<option value="${v.id}">${esc(v.n)} · ${esc(lab(v.c))}</option>`).join('');$('vs').value=sel}
+const nr=here?a.filter(v=>v.d<=5e3).length:a.length;
+$('rg').children[0].textContent='Dekat (5 km) · '+nr;$('rg').children[1].textContent='Jauh atau umum · '+a.length;
+$('rgn').textContent=rg==='dekat'&&here&&!nr&&a.length?a.length+' pedagang aktif di luar 5 km. Pilih “Jauh atau umum” untuk melihatnya.':'';
+const ph=list.length?'Pilih pedagang ('+list.length+' aktif)':!a.length?'Belum ada pedagang aktif':rg==='dekat'&&here&&!nr?'Tidak ada pedagang dalam 5 km':'Tidak ada pedagang yang cocok';
+const key=list.map(v=>v.id).join()+'|'+sel+'|'+ph;
+if($('vs').dataset.k!==key){$('vs').dataset.k=key;$('vs').innerHTML=`<option value="">${ph}</option>`+list.map(v=>`<option value="${v.id}">${esc(v.n)} · ${esc(lab(v.c))}</option>`).join('');$('vs').value=sel}
 const sv=a.find(v=>v.id===sel);
-$('dt').innerHTML=sv?`<div class="row">${I(ic(sv))}<div><div class="nm">${esc(sv.n)}</div><div class="meta">${esc(lab(sv.c))}${here?' · '+eta(sv):''}</div><div class="meta">${rt(sv)}</div>${mc&&mc.to===sv.id&&Date.now()-mc.t<9e5?'<div class="eta">Permintaan: '+({minta:'menunggu jawaban',terima:'diterima, pedagang menuju ke lokasimu',tolak:'ditolak'}[mc.s]||'')+'</div>':''}</div><div class="dist num">${here?fm(sv.d):''}</div></div>
+$('dt').innerHTML=sv?`<div class="row">${I(ic(sv))}<div><div class="nm">${esc(sv.n)}</div><div class="meta">${esc(lab(sv.c))}${here?' · '+eta(sv):''}</div><div class="meta">${rt(sv)}</div>${mc&&mc.to===sv.id&&Date.now()-mc.t<9e5?'<div class="eta">Permintaan: '+({minta:'menunggu jawaban',terima:'diterima, pedagang menuju ke lokasimu',tolak:'ditolak',batal:'dibatalkan'}[mc.s]||'')+'</div>':''}</div><div class="dist num">${here?fm(sv.d):''}</div></div>
 <button class="btn" id="call">Minta ${esc(sv.n)} lewat sini</button>
 <div class="row sw"><div><div class="nm">Pantau pedagang ini</div><div class="meta">Bunyikan HP saat ia dekat</div></div><button class="swt" id="wv" role="switch" aria-checked="${al.w.includes(sv.id)}" aria-label="Pantau pedagang ini"></button></div>`:'';
-if(sv){$('call').onclick=async()=>{if(!here)return toast('Lokasimu belum terdeteksi.');if(Date.now()-(cd[sv.id]||0)<6e4)return toast('Tunggu sebentar sebelum meminta lagi.');
-try{await db.doc('calls/'+uid).set({to:sv.id,n:$('bn').value.trim()||'Pembeli',lat:+here.lat.toFixed(4),lng:+here.lng.toFixed(4),t:Date.now(),s:'minta'});cd[sv.id]=Date.now();toast('Permintaan terkirim ke '+sv.n+'.')}catch(_){toast('Gagal mengirim permintaan.')}};
+if(sv){$('call').onclick=async()=>{if(!here)return toast('Lokasimu belum terdeteksi.');if(rqOn())return toast('Kamu masih punya permintaan aktif.');if(Date.now()-(cd[sv.id]||0)<6e4)return toast('Tunggu sebentar sebelum meminta lagi.');
+try{await db.doc('calls/'+uid).set({to:sv.id,n:$('bn').value.trim()||'Pembeli',lat:+here.lat.toFixed(4),lng:+here.lng.toFixed(4),t:Date.now(),s:'minta',cx:'',vn:sv.n});cd[sv.id]=Date.now();toast('Permintaan terkirim ke '+sv.n+'.')}catch(_){toast('Gagal mengirim permintaan.')}};
 $('wv').onclick=()=>{const i=al.w.indexOf(sv.id);if(i<0)al.w.push(sv.id);else al.w.splice(i,1);if(i<0&&!al.on){al.on=true;unlock()}saveAl();rf();draw()}}
+let rh='';if(rqOn()){const vv=V.find(v=>v.id===mc.to),far=vv&&dist(vv,mc)>2000,B=(k,t,s2)=>`<button class="btn${s2?' sec':''}" data-a="${k}"${(k==='ajukan'||k==='setuju')&&!far?' disabled':''}>${t}</button>`;let x,m;
+if(mc.s==='minta'){m='Menunggu jawaban pedagang';x=B('batal','Batalkan permintaan',1)}
+else if(mc.cx==='pedagang'){m='Pedagang meminta membatalkan';x=B('setuju','Setuju batal')+B('tidak','Tolak',1)}
+else if(mc.cx==='pembeli'){m='Menunggu persetujuan pedagang';x=B('tarik','Tarik pembatalan',1)}
+else{m='Diterima, pedagang menuju ke lokasimu';x=B('ajukan','Ajukan pembatalan',1)}
+rh=`<h2>Permintaanmu</h2><div class="row">${I('pin')}<div><div class="nm">${esc(mc.vn||'Pedagang')}</div><div class="meta">${m}${vv?' · '+fm(dist(vv,mc)):''}</div><div class="pair" style="margin-top:8px">${x}</div>${mc.s==='terima'&&vv&&!far&&!mc.cx?'<div class="meta">Pembatalan hanya bisa saat pedagang masih lebih dari 2 km.</div>':''}</div></div>`}
+$('rq').innerHTML=rh;
 C=clusters(a);
 $('hot').innerHTML=C.length?C.slice(0,5).map((o,i)=>`<button class="row hot" data-i="${i}">${I('flame')}<div><div class="nm">${o.n} pedagang berkumpul</div><div class="meta">${esc(o.names.slice(0,3).join(', '))}${o.names.length>3?' dan lainnya':''}</div></div><div class="dist num">${here?fm(dist(here,o)):''}</div></button>`).join(''):'<p class="note">Belum ada titik ramai. Titik ramai muncul saat 2 pedagang atau lebih berada di tempat yang sama.</p>';
 if(map){layer.clearLayers();const ac=getComputedStyle(document.body).getPropertyValue('--acc').trim()||'#0B6E70';
 C.forEach(o=>L.circle([o.lat,o.lng],{radius:150,color:ac,weight:1.5,dashArray:'4 4',fillColor:ac,fillOpacity:.15}).addTo(layer));
 if(sv){const p=pts(sv);if(p.length>1)L.polyline(p,{color:ac,weight:4,opacity:.85}).addTo(layer)}
-list.forEach(v=>L.marker([v.lat,v.lng],{title:v.n,icon:L.divIcon({className:'',html:`<div class="pm${v.id===sel?' on':''}">${I(ic(v))}</div>`,iconSize:[32,32],iconAnchor:[16,16]})}).on('click',()=>{sel=v.id;draw()}).addTo(layer));
+list.forEach(v=>L.marker([v.lat,v.lng],{title:v.n,icon:L.divIcon({className:'',html:`<div class="pm${v.id===sel?' on':''}">${I(ic(v))}</div>`,iconSize:[32,32],iconAnchor:[16,16]})}).on('click',()=>{sel=v.id;draw();focus(v)}).addTo(layer));
 if(here){L.circleMarker([here.lat,here.lng],{radius:7,color:'#fff',weight:2,fillColor:ac,fillOpacity:1}).addTo(layer);if(!fit){fit=true;map.setView([here.lat,here.lng],15)}}}
 rf();watchNear()};
 $('hot').onclick=e=>{const b=e.target.closest('.row');if(b&&map)map.flyTo([C[b.dataset.i].lat,C[b.dataset.i].lng],17)};
 $('fa').onclick=()=>{const p=act().map(v=>[v.lat,v.lng]);if(here)p.push([here.lat,here.lng]);if(map&&p.length)map.fitBounds(p,{padding:[30,30],maxZoom:17})};
+$('rg').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;rg=b.dataset.k;document.querySelectorAll('#rg .chip').forEach(x=>x.setAttribute('aria-pressed',x===b));draw()};
+$('rq').onclick=async e=>{const b=e.target.closest('button');if(!b||b.disabled)return;const m={ajukan:{cx:'pembeli'},tarik:{cx:''},setuju:{s:'batal',cx:''},tidak:{cx:''},batal:{s:'batal'}}[b.dataset.a];try{await db.doc('calls/'+uid).upd(m)}catch(_){toast('Gagal memperbarui permintaan.')}};
 $('q').oninput=e=>{q=e.target.value.trim().toLowerCase();draw()};
 $('cf').onchange=e=>{f=e.target.value;draw()};
-$('vs').onchange=e=>{sel=e.target.value;draw();const v=act().find(x=>x.id===sel);if(v&&map)map.panTo([v.lat,v.lng])};
+$('vs').onchange=e=>{sel=e.target.value;draw();const v=act().find(x=>x.id===sel);if(v)focus(v)};
 $('alon').onclick=()=>{al.on=!al.on;saveAl();rf();if(al.on){unlock();toast('Peringatan menyala.');watchNear()}};
 $('alv').onclick=()=>{al.v=!al.v;saveAl();rf();if(al.v&&navigator.vibrate)navigator.vibrate(80)};
 $('alr').onchange=e=>{al.r=+e.target.value;saveAl();watchNear()};
@@ -215,7 +232,7 @@ prof('pembeli',$('bn').value.trim());
 $('loc').onclick=()=>{if(!here)return toast('Lokasimu belum terdeteksi.');if(map)map.flyTo([here.lat,here.lng],16)};
 $('alfb').onclick=()=>$('alf').click();
 $('ac').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;const k=b.dataset.k,i=al.k.indexOf(k);if(i<0)al.k.push(k);else al.k.splice(i,1);if(i<0&&!al.on){al.on=true;unlock()}saveAl();rf()};
-subs.push(db.doc('calls/'+uid).onSnapshot(c=>{if(mc&&c&&mc.s==='minta'&&c.s!=='minta')toast(c.s==='terima'?'Pedagang menerima permintaanmu.':'Pedagang belum bisa lewat.');mc=c;draw()},()=>{}));
+subs.push(db.doc('calls/'+uid).onSnapshot(c=>{const o=mc||{};if(c){if(o.s==='minta'&&c.s==='terima')ntf('Pedagang menerima permintaanmu.');else if(o.s==='minta'&&c.s==='tolak')ntf('Pedagang belum bisa lewat.');else if(c.s==='batal'&&o.s&&o.s!=='batal'&&o.t===c.t)ntf('Permintaan dibatalkan.');if(c.cx==='pedagang'&&o.cx!=='pedagang'&&c.s==='terima')ntf('Pedagang meminta membatalkan. Lihat bagian Permintaanmu.');if(o.cx==='pembeli'&&c.cx===''&&c.s==='terima')ntf('Pedagang menolak pembatalan.')}mc=c;draw()},()=>{}));
 track(p=>{here=p;draw()},m=>$('msg').textContent=m);
 subs.push(db.collection('vendors').onSnapshot(s=>{V=s.docs.map(d=>({id:d.id,...d.data()}));draw()},()=>$('msg').textContent='Gagal membaca data bersama.'));
 subs.push((i=>()=>clearInterval(i))(setInterval(draw,15000)));draw()}
@@ -233,19 +250,20 @@ $('app').innerHTML=`<a class="back" href="#">${I('left')}Ganti peran</a><h1>Hala
 const me={n:'',c:'bakso',ic:'bakso',st:'henti',on:false};let pos=null,lp=null,last=0,pp=null,lm=0,t0=0,path=[],C=[],vm=null,vl=null,vf=0,tg=null,steps=[],rl=null,gi=1,said={};
 try{const s=JSON.parse(localStorage.getItem('ls')||'{}');if(s.n)$('nm').value=s.n;if(s.c)$('ct').value=s.c;if(s.x)$('cx').value=s.x;if(s.i)$('ci').value=s.i}catch(_){}
 const sx=()=>{$('cxl').hidden=$('ct').value!=='_x'};sx();$('ct').onchange=sx;
-const stOf=()=>{const n=Date.now();if(lm&&n-lm<45e3)return'jalan';return n-(lm||t0)<6e5?'henti':'istirahat'};
+const stOf=()=>{const n=Date.now();if(lm&&n-lm<75e3)return'jalan';return n-(lm||t0)<6e5?'henti':'istirahat'};
 const addPt=p=>{path.push(+p.lat.toFixed(5),+p.lng.toFixed(5));if(path.length>400)path=path.filter((_,i)=>Math.floor(i/2)%2===0)};
 const push=force=>{if(!pos)return;const n=Date.now();if(!force&&lp&&(n-last<1e4||(dist(lp,pos)<10&&n-last<6e4)))return;last=n;lp=pos;
 db.doc('vendors/'+uid).set({n:me.n,c:me.c,ic:me.ic,st:me.st,on:me.on,lat:pos.lat,lng:pos.lng,t:n,path,ts:t0}).catch(()=>toast('Gagal mengirim lokasi.'))};
 const say=t=>{toast(t);try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='id-ID';speechSynthesis.speak(u)}catch(_){}};
 const MT=m=>{const t=m.type,d=m.modifier||'',k={left:'kiri',right:'kanan','slight left':'agak ke kiri','slight right':'agak ke kanan','sharp left':'tajam ke kiri','sharp right':'tajam ke kanan'}[d];if(t==='arrive')return'Anda tiba di tujuan';if(d==='uturn')return'Putar balik';return k?'Belok '+k:'Lanjut lurus'};
+const lv=c=>{const n=Date.now();return c.to===uid&&((c.s==='minta'&&n-c.t<9e5)||(c.s==='terima'&&n-c.t<108e5))};
 const drawV=()=>{if(!vm||!pos)return;vl.clearLayers();const ac=getComputedStyle(document.body).getPropertyValue('--acc').trim()||'#0B6E70';
 if(path.length>3)L.polyline(pts({path}),{color:ac,weight:4}).addTo(vl);
 if(rl)L.polyline(rl,{color:ac,weight:4,dashArray:'6 6'}).addTo(vl);
-C.filter(c=>c.to===uid&&c.s!=='tolak'&&Date.now()-c.t<9e5).forEach(c=>L.marker([c.lat,c.lng],{icon:L.divIcon({className:'',html:`<div class="pm${c.s==='terima'?' on':''}">${I('pin')}</div>`,iconSize:[32,32],iconAnchor:[16,16]})}).addTo(vl));
+C.filter(lv).forEach(c=>L.marker([c.lat,c.lng],{icon:L.divIcon({className:'',html:`<div class="pm${c.s==='terima'?' on':''}">${I('pin')}</div>`,iconSize:[32,32],iconAnchor:[16,16]})}).addTo(vl));
 L.circleMarker([pos.lat,pos.lng],{radius:7,color:'#fff',weight:2,fillColor:ac,fillOpacity:1}).addTo(vl);
 if(!vf){vf=1;vm.setView([pos.lat,pos.lng],16)}};
-const guide=()=>{const t=C.find(c=>c.to===uid&&c.s==='terima'&&Date.now()-c.t<9e5);
+const guide=()=>{const t=C.find(c=>lv(c)&&c.s==='terima');
 if(!t){tg=null;steps=[];rl=null;$('nav').textContent='';return}
 if(!pos)return;
 if(!tg||tg.id!==t.id){tg=t;steps=[];rl=null;gi=1;said={};
@@ -256,9 +274,12 @@ while(gi<steps.length-1&&dist(pos,lc(steps[gi]))<20)gi++;
 const s=steps[gi],d=dist(pos,lc(s)),tx=MT(s.maneuver);$('nav').textContent=fm(d)+' · '+tx;
 if(d<=120&&d>35&&!said[gi+'a']){said[gi+'a']=1;say(Math.max(10,Math.round(d/10)*10)+' meter lagi, '+tx)}
 if(d<=35&&!said[gi+'b']){said[gi+'b']=1;say(tx)}};
-const cl=()=>{const a=C.filter(c=>c.to===uid&&c.s!=='tolak'&&Date.now()-c.t<9e5);$('cl').innerHTML=a.length?a.map(c=>`<div class="row">${I('pin')}<div><div class="nm">${esc(c.n)}</div><div class="meta">${c.s==='terima'?'Diterima, menuju ke pembeli':'Meminta kamu lewat'}${pos?' · '+fm(dist(pos,c)):''}</div>${c.s==='minta'?`<div class="pair" style="margin-top:8px"><button class="btn" data-a="terima" data-i="${c.id}">Terima</button><button class="btn sec" data-a="tolak" data-i="${c.id}">Tolak</button></div>`:''}</div></div>`).join(''):'<p class="note">Belum ada permintaan.</p>';guide();drawV()};
+const cl=()=>{const a=C.filter(lv);$('cl').innerHTML=a.length?a.map(c=>{const far=pos&&dist(pos,c)>2000,B=(k,t,s2)=>`<button class="btn${s2?' sec':''}" data-a="${k}" data-i="${c.id}"${(k==='ajukan'||k==='setuju')&&!far?' disabled':''}>${t}</button>`;let x;
+if(c.s==='minta')x=B('terima','Terima')+B('menolak','Tolak',1);else if(c.cx==='pembeli')x=B('setuju','Setuju batal')+B('tidak','Tolak',1);else if(c.cx==='pedagang')x=B('tarik','Tarik pembatalan',1);else x=B('ajukan','Ajukan pembatalan',1);
+const m=c.s==='minta'?'Meminta kamu lewat':c.cx==='pembeli'?'Pembeli meminta membatalkan':c.cx==='pedagang'?'Menunggu persetujuan pembeli':'Diterima, menuju ke pembeli';
+return`<div class="row">${I('pin')}<div><div class="nm">${esc(c.n)}</div><div class="meta">${m}${pos?' · '+fm(dist(pos,c)):''}</div><div class="pair" style="margin-top:8px">${x}</div>${c.s==='terima'&&pos&&!far&&!c.cx?'<div class="meta">Pembatalan hanya bisa saat jarak lebih dari 2 km.</div>':''}</div></div>`}).join(''):'<p class="note">Belum ada permintaan.</p>';guide();drawV()};
 $('vloc').onclick=()=>{if(!pos)return toast('Lokasimu belum terdeteksi.');if(vm)vm.flyTo([pos.lat,pos.lng],16)};
-$('cl').onclick=async e=>{const b=e.target.closest('button');if(!b)return;try{await db.doc('calls/'+b.dataset.i).upd({s:b.dataset.a});toast(b.dataset.a==='terima'?'Permintaan diterima.':'Permintaan ditolak.')}catch(_){toast('Gagal menjawab permintaan.')}};
+$('cl').onclick=async e=>{const b=e.target.closest('button');if(!b||b.disabled)return;const m={terima:{s:'terima',cx:''},menolak:{s:'tolak'},ajukan:{cx:'pedagang'},tarik:{cx:''},setuju:{s:'batal',cx:''},tidak:{cx:''}}[b.dataset.a];try{await db.doc('calls/'+b.dataset.i).upd(m);if(b.dataset.a==='terima')toast('Permintaan diterima.')}catch(_){toast('Gagal memperbarui permintaan.')}};
 const upd=()=>{if(!me.on||!pos)return;const s=stOf(),ch=s!==me.st;me.st=s;push(ch);$('stt').textContent=ST[s];cl()};
 const stop=()=>{me.on=false;unwatch();push(true);try{wl&&wl.release();}catch(_){}wl=null};
 leave=()=>{if(me.on)stop()};
@@ -266,13 +287,15 @@ $('go').onclick=async()=>{const g=$('go');
 if(!me.on){const x=$('cx').value.trim(),c=$('ct').value,i=$('ci').value;me.n=$('nm').value.trim()||'Dagangan';me.c=c==='_x'?(x||'Lainnya'):c;me.ic=c==='_x'?i:c;me.st='henti';me.on=true;pp=null;lm=0;t0=Date.now();path=[];lp=null;vf=0;
 try{localStorage.setItem('ls',JSON.stringify({n:$('nm').value.trim(),c,x,i}))}catch(_){}
 prof('pedagang',me.n);
-track(p=>{const n=Date.now();pos=p;if(!path.length)addPt(p);if(n-t0<2e4||!pp)pp=p;else if((p.acc||0)<=50&&dist(pp,p)>Math.max(30,p.acc||0)){pp=p;lm=n;addPt(p)}upd();if(!lp)push(true)},m=>$('msg').textContent=m);
+track(p=>{const n=Date.now();pos=p;if(!path.length)addPt(p);const ac=p.acc||0;if(n-t0<2e4||!pp)pp=p;else if(ac<=100){const th=Math.max(25,Math.min(ac,60)*.8);if(dist(pp,p)>th||(p.spd>1&&dist(pp,p)>12)){pp=p;lm=n}}
+if(ac<=100&&path.length>=2&&dist({lat:path[path.length-2],lng:path[path.length-1]},p)>Math.max(20,Math.min(ac,60)*.5))addPt(p);
+upd();if(!lp)push(true)},m=>$('msg').textContent=m);
 try{wl=await navigator.wakeLock.request('screen')}catch(_){}
 $('stt').textContent=ST.henti;toast('Mode jualan menyala. Pembeli kini bisa melihatmu.')}
 else{stop();toast('Mode jualan mati. Posisimu tidak lagi terlihat.')}
 g.setAttribute('aria-pressed',me.on);g.textContent=me.on?'Berhenti jualan':'Mulai jualan';$('mine').hidden=!me.on;
 if(me.on&&window.L){if(!vm){vm=L.map('vmap').setView([-7.8,110.37],16);L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'}).addTo(vm);vl=L.layerGroup().addTo(vm);subs.push(()=>{vm&&vm.remove();vm=null})}else vm.invalidateSize()}};
-subs.push(db.collection('calls').where('to',uid).onSnapshot(s=>{C=s.docs.map(d=>({id:d.id,...d.data()}));cl()},()=>{}));
+const PV={};subs.push(db.collection('calls').where('to',uid).onSnapshot(s=>{const n=s.docs.map(d=>({id:d.id,...d.data()}));n.forEach(c=>{const o=PV[c.id]||{};if(!o.s&&c.s==='minta'&&lv(c))ntf('Permintaan baru dari '+c.n+'.');if(c.cx==='pembeli'&&o.cx!=='pembeli'&&c.s==='terima')ntf(c.n+' meminta membatalkan.');if(o.cx==='pedagang'&&c.cx===''&&c.s==='terima')ntf(c.n+' menolak pembatalan.');if(c.s==='batal'&&o.s&&o.s!=='batal')ntf('Permintaan dari '+c.n+' dibatalkan.');PV[c.id]=c});C=n;cl()},()=>{}));
 subs.push((i=>()=>clearInterval(i))(setInterval(upd,2e4)))}
 
 async function route(){clean();const r=location.hash.slice(1);

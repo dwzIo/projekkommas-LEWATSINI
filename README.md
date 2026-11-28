@@ -48,6 +48,8 @@ Hasil: `android/app/build/outputs/apk/debug/app-debug.apk`. Bagikan hanya file `
 `.gitignore` sudah mengabaikan `node_modules`, `android/build`, dan `.gradle`. Kalau memakai salinan berisi kunci (misal `public/original.html`), tambahkan ke `.gitignore` dan cek dengan `git status`. Kunci web Firebase bukan rahasia seperti password, tapi sebaiknya dibatasi di Google Cloud Console (APIs & Services > Credentials).
 
 ## Catatan
+- Suara bawaan (lonceng, kentongan, klakson) ada di `public/sounds/`. Ganti file di sana (nama sama, format mp3) untuk mengubahnya, lalu `npm run sync`.
+- Pembatalan permintaan yang sudah diterima butuh persetujuan kedua pihak dan hanya bisa saat pedagang masih lebih dari 2 km dari pembeli (dicek di aplikasi). Filter pembeli: Dekat (5 km) atau Jauh atau umum.
 - Ikon aplikasi (gerobak pedagang berpayung merah kuning) ada di folder `icon/` dan dipasang otomatis oleh `npm run setup` ke proyek `android`. Untuk mengganti ikon, ubah file di `icon/`, jalankan `npm run setup`, lalu bangun ulang APK dan pasang ulang. Ikon baru hanya berlaku di Android 8 ke atas.
 - Pedagang: rute terekam otomatis sejak Mulai jualan. Pembeli yang meminta lewat harus dijawab Terima atau Tolak. Setelah diterima, pedagang mendapat rute jalan kaki dan suara arahan (butuh internet dan suara TTS bahasa Indonesia di HP). Rute memakai server publik routing.openstreetmap.de, tanpa jaminan ketersediaan.
 - Cara uji tanpa jalan: di emulator Android Studio, Extended controls > Location > Routes untuk memutar rute GPX.
