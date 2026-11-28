@@ -1,5 +1,5 @@
 import { execSync } from 'node:child_process';
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync, mkdirSync, copyFileSync } from 'node:fs';
 
 const run = (c) => execSync(c, { stdio: 'inherit' });
 
@@ -23,5 +23,10 @@ if (!m.includes('android.permission.VIBRATE')) {
     '    <uses-permission android:name="android.permission.VIBRATE" />\n</manifest>');
   writeFileSync(f, m);
 }
+const res = 'android/app/src/main/res/';
+mkdirSync(res + 'drawable', { recursive: true });
+mkdirSync(res + 'mipmap-anydpi-v26', { recursive: true });
+for (const n of ['ls_bg', 'ls_fg']) copyFileSync('icon/' + n + '.xml', res + 'drawable/' + n + '.xml');
+for (const n of ['ic_launcher', 'ic_launcher_round']) copyFileSync('icon/ic_launcher.xml', res + 'mipmap-anydpi-v26/' + n + '.xml');
 run('npx cap sync android');
 console.log('\nSelesai. Jalankan: npm run open (membuka Android Studio)');

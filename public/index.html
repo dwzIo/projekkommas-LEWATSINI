@@ -2,6 +2,8 @@
 <html lang="id"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Lewat Sini</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
 :root{--bg:#F7F8F9;--card:#fff;--ink:#12181F;--mute:#566176;--line:#DDE2E8;--acc:#0B6E70;--acch:#095A5C;--onacc:#fff;--tint:rgba(11,110,112,.10);--rg:#CBD3DD;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#111417;--card:#181C21;--ink:#EDEFF2;--mute:#A0A8B3;--line:#2B3138;--acc:#3CC3C5;--acch:#5DD2D4;--onacc:#06202A;--tint:rgba(60,195,197,.14);--rg:#38404A;color-scheme:dark}}
@@ -44,6 +46,18 @@ a.row:hover{background:var(--tint)}a.row:active{background:var(--tint)}
 .swt[aria-checked=true]::after{transform:translateX(20px);background:var(--onacc)}
 .pair{display:flex;gap:8px;align-items:flex-end}.pair select{flex:1;min-width:0}.pair .btn{width:auto;margin:0;padding:0 18px}
 .btn.sec{background:transparent;color:var(--ink);border-color:var(--line)}.btn.sec:hover{background:var(--tint);border-color:var(--mute)}
+.thb{position:fixed;top:calc(8px + env(safe-area-inset-top,0px));right:12px;z-index:1100;width:44px;height:44px;display:grid;place-items:center;padding:0;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);transition:background-color .15s}
+.thb:hover{background:var(--tint)}
+#map{height:320px;border:1px solid var(--line);border-radius:8px;overflow:hidden;z-index:0;background:var(--card)}
+.pm{width:32px;height:32px;border-radius:50%;background:var(--card);border:1.5px solid var(--ink);display:grid;place-items:center;color:var(--ink)}
+.pm.on{background:var(--acc);border-color:var(--acc);color:var(--onacc)}
+[data-theme=dark] .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.95) contrast(.9)}
+button.row{width:100%;background:none;border:0;border-top:1px solid var(--line);font:inherit;color:inherit;text-align:left;cursor:pointer}
+.toast{z-index:1200}
+.mw{position:relative}
+.locb{position:absolute;right:10px;bottom:10px;z-index:500;width:44px;height:44px;display:grid;place-items:center;padding:0;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);transition:background-color .15s}
+.locb:hover{background:var(--tint)}
+#vmap{height:220px;margin:12px 0 0;border:1px solid var(--line);border-radius:8px;overflow:hidden;z-index:0}
 .live{display:flex;align-items:center;gap:8px;margin:0;font-weight:600}.live::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--acc)}
 label{display:block;margin:0 0 14px;font-weight:600}
 input,select{display:block;width:100%;box-sizing:border-box;margin-top:6px;min-height:48px;padding:0 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:inherit;font-weight:400;transition:border-color .15s}
@@ -63,20 +77,36 @@ input::placeholder{color:var(--mute)}
 <symbol id="i-flame" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></symbol>
 <symbol id="i-pin" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></symbol>
 <symbol id="i-store" viewBox="0 0 24 24"><path d="m2 7 2-4h16l2 4"/><path d="M4 12v8h16v-8"/><path d="M2 7h20v2a3 3 0 0 1-6 0 3 3 0 0 1-4 0 3 3 0 0 1-4 0 3 3 0 0 1-6 0Z"/><path d="M10 20v-4h4v4"/></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></symbol>
+<symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
+<symbol id="i-kopi" viewBox="0 0 24 24"><path d="M6 2v2M10 2v2M14 2v2"/><path d="M16 8h1a4 4 0 0 1 0 8h-1"/><path d="M3 8h13v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/></symbol>
+<symbol id="i-buah" viewBox="0 0 24 24"><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"/><path d="M10 2c1 .5 2 2 2 5"/></symbol>
+<symbol id="i-nasi" viewBox="0 0 24 24"><path d="M3 2v7a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6a2 2 0 0 0 2 2h3Zm0 0v7"/></symbol>
+<symbol id="i-minuman" viewBox="0 0 24 24"><path d="m6 8 1.75 12.28a2 2 0 0 0 2 1.72h4.5a2 2 0 0 0 2-1.72L18 8"/><path d="M5 8h14"/><path d="M7 15a6.5 6.5 0 0 1 5 0 6.5 6.5 0 0 0 5 0"/><path d="m12 8 1-6h2"/></symbol>
+<symbol id="i-locate" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="7"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></symbol>
 <symbol id="i-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
 <symbol id="i-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
 </svg>
+<button class="thb" id="thb" aria-label="Ganti tema terang atau gelap"></button>
 <main id="app"><p class="note">Menghubungkan…</p></main>
 <div class="toast" id="t" role="status"></div>
 <script type="module">
-import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import {getAuth,signInAnonymously} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import {getFirestore,doc,setDoc,collection,onSnapshot} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import {initializeApp} from 'https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js';
+import {getAuth,signInAnonymously} from 'https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js';
+import {getFirestore,doc,setDoc,updateDoc,query,where,collection,onSnapshot} from 'https://www.gstatic.com/firebasejs/13.4.0/firebase-firestore.js';
 // ISI dengan konfigurasi Web App dari Firebase Console (Project settings > Your apps).
-const firebaseConfig={apiKey:"ISI_API_KEY",authDomain:"ISI_PROJECT.firebaseapp.com",projectId:"ISI_PROJECT_ID",appId:"ISI_APP_ID"};
+const firebaseConfig = {
+    apiKey: "ISI_SESUAI-FIRBASE",
+    authDomain: "ISI_SESUAI-FIRBASE",
+    projectId: "ISI_SESUAI-FIRBASE",
+    storageBucket: "ISI_SESUAI-FIRBASE",
+    messagingSenderId: "ISI_SESUAI-FIRBASE",
+    appId: "ISI_SESUAI-FIRBASE",
+    measurementId: "ISI_SESUAI-FIRBASE"
+  };
 const $=i=>document.getElementById(i);
 const I=(k,c)=>`<svg class="ic${c?' '+c:''}" aria-hidden="true"><use href="#i-${k}"/></svg>`;
-const CK=c=>['bakso','es','sayur','roti'].includes(c)?c:'lain';
+const IK=['bakso','es','sayur','roti','kopi','buah','nasi','minuman'],CK=c=>IK.includes(c)?c:'lain';
 const ST={jalan:'Berjalan',henti:'Berhenti',istirahat:'Istirahat'};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const R0=Math.PI/180;
@@ -85,113 +115,172 @@ const rel=(a,b)=>[(b.lng-a.lng)*111320*Math.cos(a.lat*R0),-(b.lat-a.lat)*110540]
 const dir=(x,y)=>['utara','timur laut','timur','tenggara','selatan','barat daya','barat','barat laut'][Math.round(Math.atan2(x,-y)/(Math.PI/4)+8)%8];
 const fm=m=>m<1000?Math.round(m)+' m':(m/1000).toFixed(1).replace('.',',')+' km';
 let db=null,uid=null,subs=[],watch=null,leave=null,tt,wl=null;
-const AL0={on:false,r:250,s:'lonceng',v:true},SD={lonceng:'Lonceng',kentongan:'Kentongan',klakson:'Klakson',dering:'Dering'},RD=[100,250,500,1000];
+const AL0={on:false,r:250,s:'lonceng',v:true,w:[],k:[],cu:'',cn:''},SD={lonceng:'Lonceng',kentongan:'Kentongan',klakson:'Klakson',dering:'Dering'},RD=[100,250,500,1000];
 let al={...AL0},ac=null;
 try{Object.assign(al,JSON.parse(localStorage.getItem('ls-al')||'{}'))}catch(_){}
-if(!SD[al.s])al.s='lonceng';if(!RD.includes(al.r))al.r=250;
+if(!Array.isArray(al.w))al.w=[];if(!Array.isArray(al.k))al.k=[];if(!SD[al.s]&&!(al.s==='custom'&&al.cu))al.s='lonceng';if(!RD.includes(al.r))al.r=250;
 const saveAl=()=>{try{localStorage.setItem('ls-al',JSON.stringify(al))}catch(_){}};
 function unlock(){try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume()}catch(_){}}
 function beep(f,t,d,ty,g){const o=ac.createOscillator(),n=ac.createGain(),s=ac.currentTime+t;o.type=ty;o.frequency.value=f;n.gain.setValueAtTime(.0001,s);n.gain.exponentialRampToValueAtTime(g,s+.01);n.gain.exponentialRampToValueAtTime(.0001,s+d);o.connect(n);n.connect(ac.destination);o.start(s);o.stop(s+d+.05)}
-function ring(k,vib){unlock();if(ac){
+function ring(k,vib){if(k==='custom'&&al.cu){try{new Audio(al.cu).play()}catch(_){}if(vib&&navigator.vibrate)navigator.vibrate([250,120,250,120,400]);return}unlock();if(ac){
 if(k==='lonceng')[0,.5,1].forEach(t=>{beep(1320,t,1.1,'sine',.5);beep(1980,t,.7,'sine',.2)});
 else if(k==='kentongan')[0,.3,.6,.9].forEach((t,i)=>beep(i%2?150:190,t,.2,'square',.35));
 else if(k==='klakson'){beep(420,0,.35,'sawtooth',.25);beep(420,.5,.35,'sawtooth',.25)}
 else[0,.35,.7,1.05].forEach((t,i)=>beep(i%2?880:660,t,.3,'triangle',.4))}
 if(vib&&navigator.vibrate)navigator.vibrate([250,120,250,120,400])}
 addEventListener('pointerdown',()=>{if(al.on)unlock()},{passive:true});
+let th='light';try{th=localStorage.getItem('ls-th')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')}catch(_){}
+const applyTh=()=>{document.documentElement.dataset.theme=th;$('thb').innerHTML=I(th==='dark'?'sun':'moon')};
+const CL={bakso:'Bakso',es:'Es',sayur:'Sayur',roti:'Roti',kopi:'Kopi',buah:'Buah',nasi:'Nasi',minuman:'Minuman'},lab=c=>CL[c]||c;
+const ic=v=>CK(v.ic||v.c),pts=v=>{const a=v.path||[],o=[];for(let i=0;i+1<a.length;i+=2)o.push([a[i],a[i+1]]);return o};
+const rt=v=>{const p=pts(v);if(p.length<2)return'Rute: belum bergerak';let d=0;for(let i=1;i<p.length;i++)d+=dist({lat:p[i-1][0],lng:p[i-1][1]},{lat:p[i][0],lng:p[i][1]});return'Rute: mulai '+new Date(v.ts||Date.now()).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})+' · '+fm(d)};
+const eta=v=>{if(v.st!=='jalan')return 'Sedang '+ST[v.st].toLowerCase();if(v.d<20)return 'Sudah dekat';const m=v.d/1.2/60,lo=Math.max(1,Math.round(m*.8)),hi=Math.max(lo+1,Math.round(m*1.3));return 'Lewat sekitar '+lo+'–'+hi+' menit lagi'};
+const prof=(role,n)=>db.doc('users/'+uid).set({role,n:n||'',t:Date.now()}).catch(()=>{});
+const clusters=vs=>{const l=[...vs],o=[];while(l.length){const a=l.shift(),g=[a];for(let i=l.length-1;i>=0;i--)if(dist(a,l[i])<=150)g.push(...l.splice(i,1));o.push({n:g.length,lat:g.reduce((s,v)=>s+v.lat,0)/g.length,lng:g.reduce((s,v)=>s+v.lng,0)/g.length,names:g.map(v=>v.n)})}return o.filter(x=>x.n>1).sort((a,b)=>b.n-a.n)};
 function toast(m){const t=$('t');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2600)}
 function clean(){if(leave){leave();leave=null}subs.forEach(f=>f());subs=[];unwatch();try{wl&&wl.release();}catch(_){}wl=null}
 const G=()=>{const c=window.Capacitor;return c&&c.isNativePlatform&&c.isNativePlatform()&&c.Plugins&&c.Plugins.Geolocation};
 function unwatch(){if(!watch)return;const w=watch;watch=null;try{if(w.n)G().clearWatch({id:w.id});else navigator.geolocation.clearWatch(w.id)}catch(_){}}
 async function track(ok,bad){const g=G();
 if(g){try{const q=await g.requestPermissions();if(q.location==='denied'){bad('Izin lokasi ditolak. Aktifkan lewat Pengaturan aplikasi.');return}
-const id=await g.watchPosition({enableHighAccuracy:true,timeout:20000},(p,e)=>{if(e||!p)return bad('Lokasi belum terdeteksi. Coba di tempat terbuka.');ok({lat:p.coords.latitude,lng:p.coords.longitude})});watch={n:1,id}}catch(_){bad('Lokasi tidak bisa diakses.')}return}
+const id=await g.watchPosition({enableHighAccuracy:true,timeout:20000},(p,e)=>{if(e||!p)return bad('Lokasi belum terdeteksi. Coba di tempat terbuka.');ok({lat:p.coords.latitude,lng:p.coords.longitude,acc:p.coords.accuracy})});watch={n:1,id}}catch(_){bad('Lokasi tidak bisa diakses.')}return}
 if(!navigator.geolocation){bad('Perangkat ini tidak mendukung lokasi.');return}
-watch={id:navigator.geolocation.watchPosition(p=>ok({lat:p.coords.latitude,lng:p.coords.longitude}),e=>bad(e.code===1?'Izin lokasi ditolak. Aktifkan izin lokasi lalu muat ulang halaman.':'Lokasi belum terdeteksi. Coba di tempat terbuka.'),{enableHighAccuracy:true,maximumAge:5000,timeout:20000})}}
+watch={id:navigator.geolocation.watchPosition(p=>ok({lat:p.coords.latitude,lng:p.coords.longitude,acc:p.coords.accuracy}),e=>bad(e.code===1?'Izin lokasi ditolak. Aktifkan izin lokasi lalu muat ulang halaman.':'Lokasi belum terdeteksi. Coba di tempat terbuka.'),{enableHighAccuracy:true,maximumAge:5000,timeout:20000})}}
 function chips(id,items,cur,fn){$(id).innerHTML=items.map(c=>`<button class="chip" data-k="${c[0]}" aria-pressed="${c[0]===cur}">${c[1]}</button>`).join('');$(id).onclick=e=>{const b=e.target.closest('.chip');if(!b)return;document.querySelectorAll('#'+id+' .chip').forEach(x=>x.setAttribute('aria-pressed',x===b));fn(b.dataset.k)}}
 
 function home(){$('app').innerHTML=`<h1 style="margin-top:28px">Lewat Sini</h1><p class="sub">Temukan pedagang keliling di dekatmu, atau bagikan posisimu saat berjualan.</p><a class="row" href="#pembeli">${I('pin')}<div><div class="nm">Saya pembeli</div><div class="meta">Lihat pedagang dan titik ramai di sekitarmu</div></div>${I('right')}</a><a class="row" href="#pedagang">${I('store')}<div><div class="nm">Saya pedagang</div><div class="meta">Bagikan posisi saat berjualan</div></div>${I('right')}</a>`}
 
 function pembeli(){
-$('app').innerHTML=`<a class="back" href="#">${I('left')}Ganti peran</a><h1>Cari pedagang</h1><p class="sub">Pedagang yang sedang berjualan di dekatmu.</p>
-<svg id="radar" class="map" viewBox="0 0 300 300" role="img" aria-label="Radar posisi pedagang dan titik ramai di sekitarmu"></svg>
+$('app').innerHTML=`<a class="back" href="#">${I('left')}Ganti peran</a><h1>Cari pedagang</h1><p class="sub">Geser dan perbesar peta untuk melihat pedagang yang jauh.</p>
+<div class="mw"><div id="map"></div><button class="locb" id="loc" aria-label="Ke posisiku">${I('locate')}</button></div><button class="btn sec" id="fa" style="margin-top:8px">Lihat semua pedagang</button>
 <p class="note" id="msg" role="status"></p>
-<button class="btn" id="ask">Minta lewat sini</button>
+<div id="dt"></div>
+<h2>Cari pedagang</h2>
+<input id="q" type="search" placeholder="Nama atau jenis dagangan" aria-label="Cari pedagang">
+<select id="cf" aria-label="Jenis dagangan"></select><select id="vs" aria-label="Pilih pedagang"></select>
+<h2>Titik ramai</h2><div id="hot"></div>
 <h2>Peringatan</h2>
-<div class="row sw"><div><div class="nm">Bunyikan saat pedagang dekat</div><div class="meta">Berlaku untuk semua pedagang aktif</div></div><button class="swt" id="alon" role="switch" aria-checked="false" aria-label="Peringatan pedagang dekat"></button></div>
+<div class="row sw"><div><div class="nm">Bunyikan saat pedagang dekat</div><div class="meta" id="wn"></div></div><button class="swt" id="alon" role="switch" aria-checked="false" aria-label="Peringatan pedagang dekat"></button></div>
 <div id="alset" hidden>
+<div class="nm" style="margin-top:12px">Bunyikan untuk dagangan</div><div class="chips" id="ac" style="flex-wrap:wrap;overflow:visible"></div>
 <div class="row sw"><div><div class="nm">Getar</div></div><button class="swt" id="alv" role="switch" aria-checked="false" aria-label="Getar"></button></div>
 <div style="margin:12px 0"><label for="alr" style="margin:0">Jarak peringatan</label><select id="alr">${RD.map(r=>`<option value="${r}">${fm(r)}</option>`).join('')}</select></div>
-<label for="als" style="margin:0">Suara</label><div class="pair"><select id="als">${Object.entries(SD).map(([k,n])=>`<option value="${k}">${n}</option>`).join('')}</select><button class="btn sec" id="alt">Coba</button></div>
-<p class="note">Hanya berbunyi saat aplikasi terbuka dan layar menyala.</p></div>
-<h2>Titik ramai</h2><div id="hot"></div>
-<h2>Pedagang aktif</h2><div class="chips" id="cf"></div><div id="list"></div>`;
-let here=null,V=[],S=[],f='semua',cd=0,seen={};
-const watchNear=()=>{if(!al.on||!here)return;const now=Date.now();V.forEach(v=>{if(!(v.on&&now-v.t<18e4)){delete seen[v.id];return}const d=dist(here,v);if(d>al.r*1.3){delete seen[v.id];return}if(d<=al.r&&!seen[v.id]){seen[v.id]=1;ring(al.s,al.v);toast((v.n||'Pedagang')+' sudah dekat, '+fm(d)+' dari kamu.')}})};
+<label for="als" style="margin:0">Suara</label><div class="pair"><select id="als"></select><button class="btn sec" id="alt">Coba</button></div>
+<div class="nm" style="margin:12px 0 0">Suara sendiri (opsional)</div><button class="btn sec" id="alfb" type="button" style="margin-top:6px">Pilih file suara</button><input id="alf" type="file" accept="audio/*" hidden><p class="meta" id="alfn"></p>
+<p class="note">Hanya berbunyi saat aplikasi terbuka dan layar menyala, dan hanya untuk pedagang yang kamu pantau.</p></div>
+<h2>Profilmu</h2><label for="bn" style="margin:0">Nama panggilan</label><input id="bn" maxlength="30" placeholder="Dilihat pedagang saat kamu minta lewat">`;
+let here=null,V=[],C=[],sel='',q='',f='semua',cd={},seen={},fit=false,map=null,layer=null,mc=null,cats=[];
+if(window.L){map=L.map('map').setView([-7.8,110.37],13);L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'}).addTo(map);layer=L.layerGroup().addTo(map);subs.push(()=>{map.remove();map=null})}else $('map').innerHTML='<p class="note" style="padding:12px">Peta tidak termuat. Periksa koneksi internet.</p>';
+const act=()=>{const n=Date.now();return V.filter(v=>v.on&&n-v.t<18e4).map(v=>({...v,d:here?dist(here,v):0}))};
+const watchNear=()=>{if(!al.on||!here)return;const a=act(),ids=new Set(a.map(v=>v.id));for(const k in seen)if(!ids.has(k))delete seen[k];a.forEach(v=>{if(!(al.w.includes(v.id)||al.k.includes(v.c))||v.d>al.r*1.3){delete seen[v.id];return}if(v.d<=al.r&&!seen[v.id]){seen[v.id]=1;ring(al.s,al.v);toast(v.n+' sudah dekat, '+fm(v.d)+' dari kamu.')}})};
+const rf=()=>{$('alon').setAttribute('aria-checked',al.on);$('alv').setAttribute('aria-checked',al.v);$('alset').hidden=!al.on;$('alr').value=al.r;
+$('als').innerHTML=Object.entries(SD).map(([k,n])=>`<option value="${k}">${n}</option>`).join('')+(al.cu?`<option value="custom">Suara sendiri${al.cn?' ('+esc(al.cn)+')':''}</option>`:'');$('als').value=al.s;$('ac').innerHTML=cats.map(c=>`<button class="chip" data-k="${esc(c)}" aria-pressed="${al.k.includes(c)}">${esc(lab(c))}</button>`).join('');$('alfn').textContent=al.cn?'File: '+al.cn:'';
+const wn=al.w.map(id=>(V.find(v=>v.id===id)||{}).n).filter(Boolean);$('wn').textContent=wn.length?'Dipantau: '+wn.join(', '):'Pilih pedagang di atas, lalu nyalakan “Pantau pedagang ini”.'};
 const draw=()=>{
-if(!here){$('list').innerHTML='<p class="note">Menunggu lokasimu…</p>';return}
-const now=Date.now();
-const vs=V.filter(v=>v.on&&now-v.t<18e4&&(f==='semua'||f===v.c)).map(v=>({...v,d:dist(here,v)})).filter(v=>v.d<=5000).sort((a,b)=>a.d-b.d);
-const g={};S.filter(s=>now-s.t<54e5).forEach(s=>{const k=Math.round(s.lat/.001)+','+Math.round(s.lng/.001),o=g[k]||(g[k]={w:0,lat:0,lng:0,n:0});o.w+=s.w;o.lat+=s.lat;o.lng+=s.lng;o.n++});
-const sp=Object.values(g).map(o=>({w:o.w,lat:o.lat/o.n,lng:o.lng/o.n})).map(o=>({...o,d:dist(here,o)})).filter(o=>o.d<=3000).sort((a,b)=>b.w-a.w||a.d-b.d).slice(0,3);
-const R=Math.max(300,Math.min(3000,Math.max(0,...vs.map(v=>v.d),...sp.map(o=>o.d))*1.15)),k=130/R,P=o=>{const[x,y]=rel(here,o);return[150+Math.max(-135,Math.min(135,x*k)),150+Math.max(-135,Math.min(135,y*k))]};
-let h=`<circle class="rg" cx="150" cy="150" r="130"/><circle class="rg" cx="150" cy="150" r="65"/><text class="lb" x="150" y="12">${fm(R)}</text>`;
-sp.forEach(o=>{const[x,y]=P(o);h+=`<circle class="hz" cx="${x}" cy="${y}" r="${8+Math.min(o.w,8)*2}"/>`});
-vs.forEach(v=>{const[x,y]=P(v);h+=`<g transform="translate(${x} ${y})"><circle class="pin" r="13"/><use class="pi" href="#i-${CK(v.c)}" x="-8" y="-8" width="16" height="16"/></g>`});
-h+='<circle class="halo" cx="150" cy="150" r="14"/><circle class="me" cx="150" cy="150" r="6"/><text class="lb" x="150" y="178">Kamu</text>';
-$('radar').innerHTML=h;
-$('hot').innerHTML=sp.length?sp.map(o=>{const[x,y]=rel(here,o);return`<div class="row hot">${I('flame')}<div><div class="nm">${o.w>=6?'Ramai':o.w>=3?'Cukup ramai':'Ada peminat'}</div><div class="meta">Ke arah ${dir(x,y)}</div></div><div class="dist num">${fm(o.d)}</div></div>`}).join(''):'<p class="note">Belum ada titik ramai. Tekan “Minta lewat sini” untuk menandai tempatmu.</p>';
-$('list').innerHTML=vs.length?vs.map(v=>{let e;if(v.st!=='jalan')e='Sedang '+ST[v.st].toLowerCase();else if(v.d<20)e='Sudah dekat';else{const mn=v.d/1.2/60,lo=Math.max(1,Math.round(mn*.8)),hi=Math.max(lo+1,Math.round(mn*1.3));e='Lewat sekitar '+lo+'–'+hi+' menit lagi'}
-return`<div class="row">${I(CK(v.c))}<div><div class="nm">${esc(v.n)}</div><div class="eta">${e}</div></div><div class="dist num">${fm(v.d)}</div></div>`}).join(''):'<p class="note">Belum ada pedagang aktif dalam 5 km. Coba lagi sebentar atau tekan “Minta lewat sini”.</p>';watchNear()};
-const rf=()=>{$('alon').setAttribute('aria-checked',al.on);$('alv').setAttribute('aria-checked',al.v);$('alset').hidden=!al.on;$('alr').value=al.r;$('als').value=al.s};rf();
+const a=act().sort((x,y)=>x.d-y.d),list=a.filter(v=>(f==='semua'||f===v.c)&&(lab(v.c)+' '+v.n).toLowerCase().includes(q));
+const cs=[...new Set([...Object.keys(CL),...a.map(v=>v.c)])],ck=cs.join('|');cats=cs;
+if($('cf').dataset.k!==ck){$('cf').dataset.k=ck;$('cf').innerHTML='<option value="semua">Semua jenis</option>'+cs.map(c=>`<option value="${esc(c)}">${esc(lab(c))}</option>`).join('');$('cf').value=f}
+if(sel&&!list.some(v=>v.id===sel))sel='';
+const key=list.map(v=>v.id).join()+'|'+sel;
+if($('vs').dataset.k!==key){$('vs').dataset.k=key;$('vs').innerHTML=`<option value="">${list.length?'Pilih pedagang ('+list.length+' aktif)':'Belum ada pedagang aktif'}</option>`+list.map(v=>`<option value="${v.id}">${esc(v.n)} · ${esc(lab(v.c))}</option>`).join('');$('vs').value=sel}
+const sv=a.find(v=>v.id===sel);
+$('dt').innerHTML=sv?`<div class="row">${I(ic(sv))}<div><div class="nm">${esc(sv.n)}</div><div class="meta">${esc(lab(sv.c))}${here?' · '+eta(sv):''}</div><div class="meta">${rt(sv)}</div>${mc&&mc.to===sv.id&&Date.now()-mc.t<9e5?'<div class="eta">Permintaan: '+({minta:'menunggu jawaban',terima:'diterima, pedagang menuju ke lokasimu',tolak:'ditolak'}[mc.s]||'')+'</div>':''}</div><div class="dist num">${here?fm(sv.d):''}</div></div>
+<button class="btn" id="call">Minta ${esc(sv.n)} lewat sini</button>
+<div class="row sw"><div><div class="nm">Pantau pedagang ini</div><div class="meta">Bunyikan HP saat ia dekat</div></div><button class="swt" id="wv" role="switch" aria-checked="${al.w.includes(sv.id)}" aria-label="Pantau pedagang ini"></button></div>`:'';
+if(sv){$('call').onclick=async()=>{if(!here)return toast('Lokasimu belum terdeteksi.');if(Date.now()-(cd[sv.id]||0)<6e4)return toast('Tunggu sebentar sebelum meminta lagi.');
+try{await db.doc('calls/'+uid).set({to:sv.id,n:$('bn').value.trim()||'Pembeli',lat:+here.lat.toFixed(4),lng:+here.lng.toFixed(4),t:Date.now(),s:'minta'});cd[sv.id]=Date.now();toast('Permintaan terkirim ke '+sv.n+'.')}catch(_){toast('Gagal mengirim permintaan.')}};
+$('wv').onclick=()=>{const i=al.w.indexOf(sv.id);if(i<0)al.w.push(sv.id);else al.w.splice(i,1);if(i<0&&!al.on){al.on=true;unlock()}saveAl();rf();draw()}}
+C=clusters(a);
+$('hot').innerHTML=C.length?C.slice(0,5).map((o,i)=>`<button class="row hot" data-i="${i}">${I('flame')}<div><div class="nm">${o.n} pedagang berkumpul</div><div class="meta">${esc(o.names.slice(0,3).join(', '))}${o.names.length>3?' dan lainnya':''}</div></div><div class="dist num">${here?fm(dist(here,o)):''}</div></button>`).join(''):'<p class="note">Belum ada titik ramai. Titik ramai muncul saat 2 pedagang atau lebih berada di tempat yang sama.</p>';
+if(map){layer.clearLayers();const ac=getComputedStyle(document.body).getPropertyValue('--acc').trim()||'#0B6E70';
+C.forEach(o=>L.circle([o.lat,o.lng],{radius:150,color:ac,weight:1.5,dashArray:'4 4',fillColor:ac,fillOpacity:.15}).addTo(layer));
+if(sv){const p=pts(sv);if(p.length>1)L.polyline(p,{color:ac,weight:4,opacity:.85}).addTo(layer)}
+list.forEach(v=>L.marker([v.lat,v.lng],{title:v.n,icon:L.divIcon({className:'',html:`<div class="pm${v.id===sel?' on':''}">${I(ic(v))}</div>`,iconSize:[32,32],iconAnchor:[16,16]})}).on('click',()=>{sel=v.id;draw()}).addTo(layer));
+if(here){L.circleMarker([here.lat,here.lng],{radius:7,color:'#fff',weight:2,fillColor:ac,fillOpacity:1}).addTo(layer);if(!fit){fit=true;map.setView([here.lat,here.lng],15)}}}
+rf();watchNear()};
+$('hot').onclick=e=>{const b=e.target.closest('.row');if(b&&map)map.flyTo([C[b.dataset.i].lat,C[b.dataset.i].lng],17)};
+$('fa').onclick=()=>{const p=act().map(v=>[v.lat,v.lng]);if(here)p.push([here.lat,here.lng]);if(map&&p.length)map.fitBounds(p,{padding:[30,30],maxZoom:17})};
+$('q').oninput=e=>{q=e.target.value.trim().toLowerCase();draw()};
+$('cf').onchange=e=>{f=e.target.value;draw()};
+$('vs').onchange=e=>{sel=e.target.value;draw();const v=act().find(x=>x.id===sel);if(v&&map)map.panTo([v.lat,v.lng])};
 $('alon').onclick=()=>{al.on=!al.on;saveAl();rf();if(al.on){unlock();toast('Peringatan menyala.');watchNear()}};
 $('alv').onclick=()=>{al.v=!al.v;saveAl();rf();if(al.v&&navigator.vibrate)navigator.vibrate(80)};
 $('alr').onchange=e=>{al.r=+e.target.value;saveAl();watchNear()};
 $('als').onchange=e=>{al.s=e.target.value;saveAl();ring(al.s,false)};
 $('alt').onclick=()=>ring(al.s,al.v);
-chips('cf',[['semua','Semua'],['bakso','Bakso'],['es','Es'],['sayur','Sayur'],['roti','Roti']],'semua',k=>{f=k;draw()});
-$('ask').onclick=async()=>{if(!here)return toast('Lokasimu belum terdeteksi.');if(Date.now()-cd<6e4)return toast('Tunggu sebentar sebelum meminta lagi.');
-try{await db.doc('spots/'+uid).set({lat:+here.lat.toFixed(3),lng:+here.lng.toFixed(3),w:1,src:'beli',t:Date.now()});cd=Date.now();toast('Permintaanmu terkirim ke pedagang sekitar.')}catch(_){toast('Gagal mengirim permintaan.')}};
+$('alf').onchange=e=>{const fl=e.target.files[0];if(!fl)return;if(fl.size>1.5e6){e.target.value='';return toast('Ukuran file maksimal 1,5 MB.')}const r=new FileReader();r.onload=()=>{al.cu=r.result;al.cn=fl.name.slice(0,30);al.s='custom';saveAl();rf();ring('custom',false)};r.readAsDataURL(fl)};
+try{$('bn').value=localStorage.getItem('ls-bn')||''}catch(_){}
+$('bn').onchange=()=>{const n=$('bn').value.trim();try{localStorage.setItem('ls-bn',n)}catch(_){}prof('pembeli',n)};
+prof('pembeli',$('bn').value.trim());
+$('loc').onclick=()=>{if(!here)return toast('Lokasimu belum terdeteksi.');if(map)map.flyTo([here.lat,here.lng],16)};
+$('alfb').onclick=()=>$('alf').click();
+$('ac').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;const k=b.dataset.k,i=al.k.indexOf(k);if(i<0)al.k.push(k);else al.k.splice(i,1);if(i<0&&!al.on){al.on=true;unlock()}saveAl();rf()};
+subs.push(db.doc('calls/'+uid).onSnapshot(c=>{if(mc&&c&&mc.s==='minta'&&c.s!=='minta')toast(c.s==='terima'?'Pedagang menerima permintaanmu.':'Pedagang belum bisa lewat.');mc=c;draw()},()=>{}));
 track(p=>{here=p;draw()},m=>$('msg').textContent=m);
-const er=()=>$('msg').textContent='Gagal membaca data bersama.';
-subs.push(db.collection('vendors').onSnapshot(s=>{V=s.docs.map(d=>({id:d.id,...d.data()}));draw()},er));
-subs.push(db.collection('spots').onSnapshot(s=>{S=s.docs.map(d=>d.data());draw()},er));
-setInterval&&subs.push((i=>()=>clearInterval(i))(setInterval(draw,15000)))}
+subs.push(db.collection('vendors').onSnapshot(s=>{V=s.docs.map(d=>({id:d.id,...d.data()}));draw()},()=>$('msg').textContent='Gagal membaca data bersama.'));
+subs.push((i=>()=>clearInterval(i))(setInterval(draw,15000)));draw()}
 
 function pedagang(){
-$('app').innerHTML=`<a class="back" href="#">${I('left')}Ganti peran</a><h1>Halaman pedagang</h1><p class="sub">Nyalakan saat mulai berkeliling. Pembeli di sekitar bisa melihat posisimu.</p>
+$('app').innerHTML=`<a class="back" href="#">${I('left')}Ganti peran</a><h1>Halaman pedagang</h1><p class="sub">Nyalakan saat mulai berkeliling. Pembeli bisa melihat posisi dan rutemu.</p>
 <label>Nama dagangan<input id="nm" maxlength="30" placeholder="Contoh: Bakso Pak Darto"></label>
-<label>Jenis dagangan<select id="ct"><option value="bakso">Bakso</option><option value="es">Es</option><option value="sayur">Sayur</option><option value="roti">Roti</option><option value="lain">Lainnya</option></select></label>
+<label>Jenis dagangan<select id="ct">${Object.entries(CL).map(([k,n])=>`<option value="${k}">${n}</option>`).join('')}<option value="_x">Lainnya (tulis sendiri)</option></select></label>
+<div id="cxl" hidden><label>Nama jenis dagangan<input id="cx" maxlength="24" placeholder="Contoh: Siomay"></label><label>Ikon di peta<select id="ci">${IK.map(k=>`<option value="${k}">${CL[k]}</option>`).join('')}<option value="lain">Keranjang</option></select></label></div>
 <button class="btn go" id="go" aria-pressed="false">Mulai jualan</button>
 <p class="note" id="msg" role="status"></p>
-<div id="mine" hidden><p class="live">Posisimu sedang dibagikan</p><h2>Statusmu</h2><div class="seg" id="seg"></div><h2>Titik ramai</h2><button class="btn" id="hotb" disabled>Ramai di sini</button><p class="eta num" id="wait"></p></div>
+<div id="mine" hidden><p class="live">Posisimu sedang dibagikan</p><h2>Status terdeteksi</h2><p class="nm" id="stt" style="margin:4px 0"></p><p class="meta">Berubah otomatis dari gerakanmu. Rutemu terekam sejak mulai jualan.</p>
+<div class="mw"><div id="vmap"></div><button class="locb" id="vloc" aria-label="Ke posisiku">${I('locate')}</button></div><p class="nm" id="nav" style="margin:10px 0 0"></p><h2>Permintaan pembeli</h2><div id="cl"></div></div>
 <p class="note">Posisimu hanya terlihat saat mode jualan menyala. Biarkan layar menyala agar lokasi terus terkirim.</p>`;
-const me={n:'',c:'bakso',st:'jalan',on:false};let pos=null,lp=null,last=0,S=[],cd=0;
-try{const s=JSON.parse(localStorage.getItem('ls')||'{}');if(s.n)$('nm').value=s.n;if(s.c)$('ct').value=s.c}catch(_){}
+const me={n:'',c:'bakso',ic:'bakso',st:'henti',on:false};let pos=null,lp=null,last=0,pp=null,lm=0,t0=0,path=[],C=[],vm=null,vl=null,vf=0,tg=null,steps=[],rl=null,gi=1,said={};
+try{const s=JSON.parse(localStorage.getItem('ls')||'{}');if(s.n)$('nm').value=s.n;if(s.c)$('ct').value=s.c;if(s.x)$('cx').value=s.x;if(s.i)$('ci').value=s.i}catch(_){}
+const sx=()=>{$('cxl').hidden=$('ct').value!=='_x'};sx();$('ct').onchange=sx;
+const stOf=()=>{const n=Date.now();if(lm&&n-lm<45e3)return'jalan';return n-(lm||t0)<6e5?'henti':'istirahat'};
+const addPt=p=>{path.push(+p.lat.toFixed(5),+p.lng.toFixed(5));if(path.length>400)path=path.filter((_,i)=>Math.floor(i/2)%2===0)};
 const push=force=>{if(!pos)return;const n=Date.now();if(!force&&lp&&(n-last<1e4||(dist(lp,pos)<10&&n-last<6e4)))return;last=n;lp=pos;
-db.doc('vendors/'+uid).set({n:me.n,c:me.c,st:me.st,on:me.on,lat:pos.lat,lng:pos.lng,t:n}).catch(()=>toast('Gagal mengirim lokasi.'))};
-const near=()=>{if(!pos)return;const n=Date.now(),c=S.filter(s=>s.src==='beli'&&n-s.t<36e5&&dist(pos,s)<=500).length;$('wait').textContent=c?'Pembeli minta lewat di sekitarmu: '+c:'Belum ada permintaan di sekitarmu.'};
+db.doc('vendors/'+uid).set({n:me.n,c:me.c,ic:me.ic,st:me.st,on:me.on,lat:pos.lat,lng:pos.lng,t:n,path,ts:t0}).catch(()=>toast('Gagal mengirim lokasi.'))};
+const say=t=>{toast(t);try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='id-ID';speechSynthesis.speak(u)}catch(_){}};
+const MT=m=>{const t=m.type,d=m.modifier||'',k={left:'kiri',right:'kanan','slight left':'agak ke kiri','slight right':'agak ke kanan','sharp left':'tajam ke kiri','sharp right':'tajam ke kanan'}[d];if(t==='arrive')return'Anda tiba di tujuan';if(d==='uturn')return'Putar balik';return k?'Belok '+k:'Lanjut lurus'};
+const drawV=()=>{if(!vm||!pos)return;vl.clearLayers();const ac=getComputedStyle(document.body).getPropertyValue('--acc').trim()||'#0B6E70';
+if(path.length>3)L.polyline(pts({path}),{color:ac,weight:4}).addTo(vl);
+if(rl)L.polyline(rl,{color:ac,weight:4,dashArray:'6 6'}).addTo(vl);
+C.filter(c=>c.to===uid&&c.s!=='tolak'&&Date.now()-c.t<9e5).forEach(c=>L.marker([c.lat,c.lng],{icon:L.divIcon({className:'',html:`<div class="pm${c.s==='terima'?' on':''}">${I('pin')}</div>`,iconSize:[32,32],iconAnchor:[16,16]})}).addTo(vl));
+L.circleMarker([pos.lat,pos.lng],{radius:7,color:'#fff',weight:2,fillColor:ac,fillOpacity:1}).addTo(vl);
+if(!vf){vf=1;vm.setView([pos.lat,pos.lng],16)}};
+const guide=()=>{const t=C.find(c=>c.to===uid&&c.s==='terima'&&Date.now()-c.t<9e5);
+if(!t){tg=null;steps=[];rl=null;$('nav').textContent='';return}
+if(!pos)return;
+if(!tg||tg.id!==t.id){tg=t;steps=[];rl=null;gi=1;said={};
+fetch(`https://routing.openstreetmap.de/routed-foot/route/v1/foot/${pos.lng},${pos.lat};${t.lng},${t.lat}?overview=full&geometries=geojson&steps=true`).then(r=>r.json()).then(j=>{const r=j.routes&&j.routes[0];if(!r)throw 0;rl=r.geometry.coordinates.map(c=>[c[1],c[0]]);steps=r.legs[0].steps;drawV()}).catch(()=>{rl=[[pos.lat,pos.lng],[t.lat,t.lng]];drawV()})}
+if(!steps.length){$('nav').textContent='Menuju pembeli: '+fm(dist(pos,t));return}
+const lc=s=>({lat:s.maneuver.location[1],lng:s.maneuver.location[0]});
+while(gi<steps.length-1&&dist(pos,lc(steps[gi]))<20)gi++;
+const s=steps[gi],d=dist(pos,lc(s)),tx=MT(s.maneuver);$('nav').textContent=fm(d)+' · '+tx;
+if(d<=120&&d>35&&!said[gi+'a']){said[gi+'a']=1;say(Math.max(10,Math.round(d/10)*10)+' meter lagi, '+tx)}
+if(d<=35&&!said[gi+'b']){said[gi+'b']=1;say(tx)}};
+const cl=()=>{const a=C.filter(c=>c.to===uid&&c.s!=='tolak'&&Date.now()-c.t<9e5);$('cl').innerHTML=a.length?a.map(c=>`<div class="row">${I('pin')}<div><div class="nm">${esc(c.n)}</div><div class="meta">${c.s==='terima'?'Diterima, menuju ke pembeli':'Meminta kamu lewat'}${pos?' · '+fm(dist(pos,c)):''}</div>${c.s==='minta'?`<div class="pair" style="margin-top:8px"><button class="btn" data-a="terima" data-i="${c.id}">Terima</button><button class="btn sec" data-a="tolak" data-i="${c.id}">Tolak</button></div>`:''}</div></div>`).join(''):'<p class="note">Belum ada permintaan.</p>';guide();drawV()};
+$('vloc').onclick=()=>{if(!pos)return toast('Lokasimu belum terdeteksi.');if(vm)vm.flyTo([pos.lat,pos.lng],16)};
+$('cl').onclick=async e=>{const b=e.target.closest('button');if(!b)return;try{await db.doc('calls/'+b.dataset.i).upd({s:b.dataset.a});toast(b.dataset.a==='terima'?'Permintaan diterima.':'Permintaan ditolak.')}catch(_){toast('Gagal menjawab permintaan.')}};
+const upd=()=>{if(!me.on||!pos)return;const s=stOf(),ch=s!==me.st;me.st=s;push(ch);$('stt').textContent=ST[s];cl()};
 const stop=()=>{me.on=false;unwatch();push(true);try{wl&&wl.release();}catch(_){}wl=null};
 leave=()=>{if(me.on)stop()};
-chips('seg',Object.keys(ST).map(k=>[k,ST[k]]),'jalan',k=>{me.st=k;if(me.on)push(true)});
 $('go').onclick=async()=>{const g=$('go');
-if(!me.on){me.n=$('nm').value.trim()||'Dagangan';me.c=$('ct').value;me.st='jalan';me.on=true;
-try{localStorage.setItem('ls',JSON.stringify({n:$('nm').value.trim(),c:me.c}))}catch(_){}
-document.querySelectorAll('#seg .chip').forEach(x=>x.setAttribute('aria-pressed',x.dataset.k==='jalan'));
-track(p=>{pos=p;$('hotb').disabled=false;push(false);near()},m=>$('msg').textContent=m);
+if(!me.on){const x=$('cx').value.trim(),c=$('ct').value,i=$('ci').value;me.n=$('nm').value.trim()||'Dagangan';me.c=c==='_x'?(x||'Lainnya'):c;me.ic=c==='_x'?i:c;me.st='henti';me.on=true;pp=null;lm=0;t0=Date.now();path=[];lp=null;vf=0;
+try{localStorage.setItem('ls',JSON.stringify({n:$('nm').value.trim(),c,x,i}))}catch(_){}
+prof('pedagang',me.n);
+track(p=>{const n=Date.now();pos=p;if(!path.length)addPt(p);if(n-t0<2e4||!pp)pp=p;else if((p.acc||0)<=50&&dist(pp,p)>Math.max(30,p.acc||0)){pp=p;lm=n;addPt(p)}upd();if(!lp)push(true)},m=>$('msg').textContent=m);
 try{wl=await navigator.wakeLock.request('screen')}catch(_){}
-toast('Mode jualan menyala. Pembeli kini bisa melihatmu.')}
+$('stt').textContent=ST.henti;toast('Mode jualan menyala. Pembeli kini bisa melihatmu.')}
 else{stop();toast('Mode jualan mati. Posisimu tidak lagi terlihat.')}
-g.setAttribute('aria-pressed',me.on);g.textContent=me.on?'Berhenti jualan':'Mulai jualan';$('mine').hidden=!me.on};
-$('hotb').onclick=async()=>{if(!pos)return;if(Date.now()-cd<6e4)return toast('Tunggu sebentar sebelum menandai lagi.');
-try{await db.doc('spots/'+uid).set({lat:+pos.lat.toFixed(3),lng:+pos.lng.toFixed(3),w:3,src:'jual',t:Date.now()});cd=Date.now();toast('Titik ramai tercatat.')}catch(_){toast('Gagal mencatat titik ramai.')}};
-subs.push(db.collection('spots').onSnapshot(s=>{S=s.docs.map(d=>d.data());near()},()=>{}))}
+g.setAttribute('aria-pressed',me.on);g.textContent=me.on?'Berhenti jualan':'Mulai jualan';$('mine').hidden=!me.on;
+if(me.on&&window.L){if(!vm){vm=L.map('vmap').setView([-7.8,110.37],16);L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'}).addTo(vm);vl=L.layerGroup().addTo(vm);subs.push(()=>{vm&&vm.remove();vm=null})}else vm.invalidateSize()}};
+subs.push(db.collection('calls').where('to',uid).onSnapshot(s=>{C=s.docs.map(d=>({id:d.id,...d.data()}));cl()},()=>{}));
+subs.push((i=>()=>clearInterval(i))(setInterval(upd,2e4)))}
 
 async function route(){clean();const r=location.hash.slice(1);
-if(r!=='pembeli'&&r!=='pedagang')return home();
+if(r!=='pembeli'&&r!=='pedagang'){home();if(uid)$('app').insertAdjacentHTML('beforeend','<p class="meta" style="margin-top:24px">ID uji: '+uid.slice(-6)+'</p>');return}
 if(!db||!uid){$('app').innerHTML='<a class="back" href="#">'+I('left')+'Ganti peran</a><p class="note">Tidak bisa terhubung ke server. Periksa koneksi internet dan konfigurasi Firebase.</p>';return}
 (r==='pembeli'?pembeli:pedagang)();scrollTo(0,0)}
 (async()=>{try{const app=initializeApp(firebaseConfig),fs=getFirestore(app);uid=(await signInAnonymously(getAuth(app))).user.uid;
-db={doc:p=>({set:o=>setDoc(doc(fs,p),o)}),collection:n=>({onSnapshot:(ok,er)=>onSnapshot(collection(fs,n),s=>ok({docs:s.docs.map(d=>({id:d.id,data:()=>d.data()}))}),er)})}}catch(_){db=null}
-addEventListener('hashchange',route);route()})();
+const W=s=>({docs:s.docs.map(d=>({id:d.id,data:()=>d.data()}))});
+db={doc:p=>({set:o=>setDoc(doc(fs,p),o),upd:o=>updateDoc(doc(fs,p),o),onSnapshot:(ok,er)=>onSnapshot(doc(fs,p),s=>ok(s.exists()?s.data():null),er)}),collection:n=>({onSnapshot:(ok,er)=>onSnapshot(collection(fs,n),s=>ok(W(s)),er),where:(f,v)=>({onSnapshot:(ok,er)=>onSnapshot(query(collection(fs,n),where(f,'==',v)),s=>ok(W(s)),er)})})}}catch(_){db=null}
+$('thb').onclick=()=>{th=th==='dark'?'light':'dark';try{localStorage.setItem('ls-th',th)}catch(_){}applyTh()};applyTh();addEventListener('hashchange',route);route()})();
 </script></body></html>
